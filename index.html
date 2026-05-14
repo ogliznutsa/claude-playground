@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Крестики-нолики</title>
+  <style>
+    :root {
+      --bg: #15171c;
+      --panel: #1e2128;
+      --panel-2: #262a33;
+      --text: #e8eaee;
+      --muted: #8a909c;
+      --accent: #6aa6ff;
+      --x: #6aa6ff;
+      --o: #ffb86a;
+      --win: #2f6b3a;
+      --border: #2c3140;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .players {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .player-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .player-field label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .player-field .mark { font-weight: 700; }
+    .player-field .mark.x { color: var(--x); }
+    .player-field .mark.o { color: var(--o); }
+
+    .player-field input {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 15px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      outline: none;
+      width: 100%;
+    }
+
+    .player-field input:focus {
+      border-color: var(--accent);
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .score {
+      background: var(--panel-2);
+      border-radius: 8px;
+      padding: 10px 8px;
+    }
+
+    .score .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .score .value {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .score.x .value { color: var(--x); }
+    .score.o .value { color: var(--o); }
+
+    .status {
+      text-align: center;
+      font-size: 16px;
+      min-height: 24px;
+    }
+
+    .status .name { font-weight: 700; }
+    .status .name.x { color: var(--x); }
+    .status .name.o { color: var(--o); }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .cell {
+      aspect-ratio: 1 / 1;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: clamp(40px, 14vw, 64px);
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: background-color 0.12s ease, transform 0.05s ease;
+      font-family: inherit;
+      padding: 0;
+    }
+
+    .cell:hover:not(:disabled) {
+      background: #2f343f;
+    }
+
+    .cell:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .cell:disabled {
+      cursor: default;
+    }
+
+    .cell.x { color: var(--x); }
+    .cell.o { color: var(--o); }
+
+    .cell.win {
+      background: var(--win);
+      border-color: var(--win);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    button.action {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background-color 0.12s ease;
+    }
+
+    button.action:hover { background: #2f343f; }
+    button.action.primary { background: var(--accent); border-color: var(--accent); color: #0d1117; font-weight: 600; }
+    button.action.primary:hover { background: #82b6ff; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>Крестики-нолики</h1>
+
+    <section class="panel players">
+      <div class="player-field">
+        <label><span class="mark x">X</span> · Игрок 1</label>
+        <input id="name-x" type="text" maxlength="20" autocomplete="off" />
+      </div>
+      <div class="player-field">
+        <label><span class="mark o">O</span> · Игрок 2</label>
+        <input id="name-o" type="text" maxlength="20" autocomplete="off" />
+      </div>
+    </section>
+
+    <section class="panel scoreboard">
+      <div class="score x">
+        <div class="label" id="score-x-label">X</div>
+        <div class="value" id="score-x">0</div>
+      </div>
+      <div class="score">
+        <div class="label">Ничьи</div>
+        <div class="value" id="score-d">0</div>
+      </div>
+      <div class="score o">
+        <div class="label" id="score-o-label">O</div>
+        <div class="value" id="score-o">0</div>
+      </div>
+    </section>
+
+    <div class="status" id="status"></div>
+
+    <section class="board" id="board">
+      <button class="cell" data-index="0" type="button"></button>
+      <button class="cell" data-index="1" type="button"></button>
+      <button class="cell" data-index="2" type="button"></button>
+      <button class="cell" data-index="3" type="button"></button>
+      <button class="cell" data-index="4" type="button"></button>
+      <button class="cell" data-index="5" type="button"></button>
+      <button class="cell" data-index="6" type="button"></button>
+      <button class="cell" data-index="7" type="button"></button>
+      <button class="cell" data-index="8" type="button"></button>
+    </section>
+
+    <div class="controls">
+      <button class="action primary" id="btn-new" type="button">Новая игра</button>
+      <button class="action" id="btn-reset" type="button">Сбросить счёт</button>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const WIN_LINES = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6],
+      ];
+
+      const STORAGE_SCORES = "tictactoe.scores";
+      const STORAGE_NAMES = "tictactoe.names";
+      const STORAGE_STARTER = "tictactoe.starter";
+
+      const $cells = Array.from(document.querySelectorAll(".cell"));
+      const $status = document.getElementById("status");
+      const $scoreX = document.getElementById("score-x");
+      const $scoreO = document.getElementById("score-o");
+      const $scoreD = document.getElementById("score-d");
+      const $scoreXLabel = document.getElementById("score-x-label");
+      const $scoreOLabel = document.getElementById("score-o-label");
+      const $nameX = document.getElementById("name-x");
+      const $nameO = document.getElementById("name-o");
+      const $btnNew = document.getElementById("btn-new");
+      const $btnReset = document.getElementById("btn-reset");
+
+      const defaultNames = { X: "Игрок 1", O: "Игрок 2" };
+
+      const state = {
+        board: Array(9).fill(null),
+        currentPlayer: "X",
+        gameOver: false,
+        winningLine: null,
+        scores: loadScores(),
+        names: loadNames(),
+        nextStarter: loadStarter(),
+      };
+
+      state.currentPlayer = state.nextStarter;
+
+      $nameX.value = state.names.X;
+      $nameO.value = state.names.O;
+
+      function loadScores() {
+        try {
+          const raw = localStorage.getItem(STORAGE_SCORES);
+          if (!raw) return { X: 0, O: 0, draws: 0 };
+          const parsed = JSON.parse(raw);
+          return {
+            X: Number.isFinite(parsed.X) ? parsed.X : 0,
+            O: Number.isFinite(parsed.O) ? parsed.O : 0,
+            draws: Number.isFinite(parsed.draws) ? parsed.draws : 0,
+          };
+        } catch (_) {
+          return { X: 0, O: 0, draws: 0 };
+        }
+      }
+
+      function loadNames() {
+        try {
+          const raw = localStorage.getItem(STORAGE_NAMES);
+          if (!raw) return { ...defaultNames };
+          const parsed = JSON.parse(raw);
+          return {
+            X: typeof parsed.X === "string" && parsed.X ? parsed.X : defaultNames.X,
+            O: typeof parsed.O === "string" && parsed.O ? parsed.O : defaultNames.O,
+          };
+        } catch (_) {
+          return { ...defaultNames };
+        }
+      }
+
+      function loadStarter() {
+        const v = localStorage.getItem(STORAGE_STARTER);
+        return v === "O" ? "O" : "X";
+      }
+
+      function saveScores() {
+        localStorage.setItem(STORAGE_SCORES, JSON.stringify(state.scores));
+      }
+
+      function saveNames() {
+        localStorage.setItem(STORAGE_NAMES, JSON.stringify(state.names));
+      }
+
+      function saveStarter() {
+        localStorage.setItem(STORAGE_STARTER, state.nextStarter);
+      }
+
+      function nameOf(mark) {
+        const n = state.names[mark];
+        return n && n.trim() ? n : defaultNames[mark];
+      }
+
+      function checkResult() {
+        for (const line of WIN_LINES) {
+          const [a, b, c] = line;
+          const v = state.board[a];
+          if (v && v === state.board[b] && v === state.board[c]) {
+            return { winner: v, line };
+          }
+        }
+        if (state.board.every((v) => v !== null)) {
+          return { winner: null, line: null };
+        }
+        return null;
+      }
+
+      function handleCellClick(event) {
+        const idx = Number(event.currentTarget.dataset.index);
+        if (state.gameOver) return;
+        if (state.board[idx] !== null) return;
+
+        state.board[idx] = state.currentPlayer;
+
+        const result = checkResult();
+        if (result) {
+          endRound(result);
+        } else {
+          state.currentPlayer = state.currentPlayer === "X" ? "O" : "X";
+        }
+        render();
+      }
+
+      function endRound(result) {
+        state.gameOver = true;
+        if (result.winner) {
+          state.scores[result.winner] += 1;
+          state.winningLine = result.line;
+          state.nextStarter = result.winner === "X" ? "O" : "X";
+        } else {
+          state.scores.draws += 1;
+          state.winningLine = null;
+          state.nextStarter = state.nextStarter === "X" ? "O" : "X";
+        }
+        saveScores();
+        saveStarter();
+      }
+
+      function newGame() {
+        state.board = Array(9).fill(null);
+        state.gameOver = false;
+        state.winningLine = null;
+        state.currentPlayer = state.nextStarter;
+        render();
+      }
+
+      function resetScores() {
+        state.scores = { X: 0, O: 0, draws: 0 };
+        saveScores();
+        render();
+      }
+
+      function render() {
+        $cells.forEach((btn, i) => {
+          const v = state.board[i];
+          btn.textContent = v || "";
+          btn.classList.toggle("x", v === "X");
+          btn.classList.toggle("o", v === "O");
+          const isWin = state.winningLine && state.winningLine.includes(i);
+          btn.classList.toggle("win", !!isWin);
+          btn.disabled = state.gameOver || v !== null;
+        });
+
+        $scoreXLabel.textContent = nameOf("X");
+        $scoreOLabel.textContent = nameOf("O");
+        $scoreX.textContent = String(state.scores.X);
+        $scoreO.textContent = String(state.scores.O);
+        $scoreD.textContent = String(state.scores.draws);
+
+        if (!state.gameOver) {
+          const mark = state.currentPlayer.toLowerCase();
+          $status.innerHTML =
+            "Ход: <span class=\"name " + mark + "\">" +
+            escapeHtml(nameOf(state.currentPlayer)) + " (" + state.currentPlayer + ")</span>";
+        } else if (state.winningLine) {
+          const winner = state.board[state.winningLine[0]];
+          const mark = winner.toLowerCase();
+          $status.innerHTML =
+            "Победил: <span class=\"name " + mark + "\">" +
+            escapeHtml(nameOf(winner)) + " (" + winner + ")</span>";
+        } else {
+          $status.textContent = "Ничья";
+        }
+      }
+
+      function escapeHtml(s) {
+        return s.replace(/[&<>"']/g, (ch) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+        })[ch]);
+      }
+
+      $cells.forEach((btn) => btn.addEventListener("click", handleCellClick));
+      $btnNew.addEventListener("click", newGame);
+      $btnReset.addEventListener("click", resetScores);
+
+      $nameX.addEventListener("input", () => {
+        state.names.X = $nameX.value;
+        saveNames();
+        render();
+      });
+      $nameO.addEventListener("input", () => {
+        state.names.O = $nameO.value;
+        saveNames();
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
