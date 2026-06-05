@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice FX — запись голоса с эффектами</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="app__header">
+      <h1>🎙️ Voice FX</h1>
+      <p class="app__subtitle">Запиши голос и наложи эффекты</p>
+    </header>
+
+    <!-- Блок записи -->
+    <section class="recorder">
+      <button id="recordBtn" class="record-btn" aria-label="Записать">
+        <span class="record-btn__icon"></span>
+      </button>
+      <div class="recorder__status">
+        <span id="timer" class="timer">00:00</span>
+        <span id="hint" class="hint">Нажми, чтобы начать запись</span>
+      </div>
+    </section>
+
+    <!-- Осциллограмма -->
+    <canvas id="waveform" class="waveform" width="700" height="120"></canvas>
+
+    <!-- Выбор эффекта -->
+    <section id="effects" class="effects hidden">
+      <h2 class="effects__title">Эффект</h2>
+      <div id="effectList" class="effects__list"></div>
+    </section>
+
+    <!-- Управление воспроизведением -->
+    <section id="controls" class="controls hidden">
+      <button id="playBtn" class="btn btn--primary">▶ Прослушать</button>
+      <button id="stopBtn" class="btn">■ Стоп</button>
+      <button id="downloadBtn" class="btn">⬇ Скачать (.wav)</button>
+    </section>
+
+    <p id="error" class="error hidden"></p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

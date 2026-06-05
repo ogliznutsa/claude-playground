@@ -1,0 +1,176 @@
+:root {
+  --bg: #0e1116;
+  --panel: #171b22;
+  --panel-2: #1f242d;
+  --text: #e8ecf1;
+  --muted: #8b94a3;
+  --accent: #6c8cff;
+  --accent-2: #4a6bff;
+  --danger: #ff5b6e;
+  --ok: #36d399;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(1200px 600px at 50% -10%, #1a2030, var(--bg));
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 16px;
+}
+
+.app {
+  width: 100%;
+  max-width: 720px;
+  background: var(--panel);
+  border: 1px solid #262c36;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.app__header { text-align: center; margin-bottom: 28px; }
+.app__header h1 { margin: 0; font-size: 30px; letter-spacing: -0.02em; }
+.app__subtitle { margin: 6px 0 0; color: var(--muted); }
+
+/* ---- Кнопка записи ---- */
+.recorder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.record-btn {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  display: grid;
+  place-items: center;
+  transition: transform 0.12s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 30px rgba(74, 107, 255, 0.45);
+}
+.record-btn:hover { transform: translateY(-2px); }
+.record-btn:active { transform: translateY(0); }
+
+.record-btn__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+/* Состояние «идёт запись» */
+.record-btn.recording {
+  background: linear-gradient(180deg, #ff6b7d, var(--danger));
+  box-shadow: 0 10px 30px rgba(255, 91, 110, 0.5);
+  animation: pulse 1.4s infinite;
+}
+.record-btn.recording .record-btn__icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+}
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 91, 110, 0.45); }
+  70%  { box-shadow: 0 0 0 18px rgba(255, 91, 110, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 91, 110, 0); }
+}
+
+.recorder__status { text-align: center; }
+.timer {
+  display: block;
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.hint { color: var(--muted); font-size: 14px; }
+
+/* ---- Осциллограмма ---- */
+.waveform {
+  width: 100%;
+  height: 120px;
+  background: var(--panel-2);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  display: block;
+}
+
+/* ---- Эффекты ---- */
+.effects { margin-bottom: 22px; }
+.effects__title,
+.controls__title { font-size: 15px; color: var(--muted); margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.effects__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.effect-card {
+  border: 1px solid #2a313c;
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 16px 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s ease, transform 0.1s ease, background 0.15s ease;
+}
+.effect-card:hover { transform: translateY(-2px); border-color: #44506a; }
+.effect-card.active {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(108, 140, 255, 0.18), rgba(108, 140, 255, 0.06));
+}
+.effect-card__emoji { font-size: 26px; display: block; margin-bottom: 6px; }
+.effect-card__name { font-size: 14px; font-weight: 600; }
+
+/* ---- Кнопки управления ---- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn {
+  border: 1px solid #2a313c;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.btn:hover { border-color: #44506a; transform: translateY(-1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn--primary {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  font-weight: 600;
+}
+
+/* ---- Прочее ---- */
+.hidden { display: none !important; }
+.error {
+  margin-top: 18px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 91, 110, 0.12);
+  border: 1px solid rgba(255, 91, 110, 0.4);
+  color: #ffb3bc;
+  text-align: center;
+}
